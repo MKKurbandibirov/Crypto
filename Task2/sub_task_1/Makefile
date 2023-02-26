@@ -1,2 +1,2 @@
 all:
-	@go build -o crypto main.go
+	@go build -o crypto ./cmd

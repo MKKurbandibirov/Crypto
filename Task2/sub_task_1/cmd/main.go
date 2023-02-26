@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"math"
 	"math/rand"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -46,7 +43,7 @@ func (r *Register) GetStringDigit() string {
 func (r *Register) ParsePoly(poly string) {
 	polynome := strings.Split(poly, "+")
 	polynome = polynome[:len(polynome)-1]
-
+	
 	for i := 0; i < len(polynome); i++ {
 		val, _ := strconv.Atoi(polynome[i][1:])
 		r.polynome = append(r.polynome, val)
@@ -69,53 +66,15 @@ func (r *Register) GenRegister() {
 }
 
 func (r *Register) FeedBackFunc() int {
-	var newDigit int
-	for _, k_i := range r.polynome {
-		newDigit ^= r.Digits[k_i-1]
+	var newDigit = r.Digits[r.L - r.polynome[0]]
+	for i := 1; i < len(r.polynome); i++ {
+		newDigit ^= r.Digits[r.L - r.polynome[i]]
 	}
 
 	rightLast := r.Digits[len(r.Digits)-1]
 	r.Digits = append([]int{newDigit}, r.Digits[:len(r.Digits)-1]...)
 
 	return rightLast
-}
-
-func WriteToFile(filename, data string) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	if _, err := writer.WriteString(data); err != nil {
-		return err
-	}
-	defer writer.Flush()
-
-	return nil
-}
-
-func ReadFromFile(filename string) ([]int, error) {
-	file, err := os.Open("key.txt")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
-	
-	key, err := reader.ReadString('\n')
-	if err != nil && err != io.EOF {
-		return nil, err
-	}
-
-	result := make([]int, 0)
-	for i := 0; i < len(key); i++ {
-		result = append(result, int(key[i]-'0'))
-	}
-
-	return result, nil
 }
 
 func main() {
@@ -137,6 +96,7 @@ func main() {
 	if keyFile != "" {
 		var err error
 		reg.Digits, err = ReadFromFile(keyFile)
+		reg.L = len(reg.Digits)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -150,11 +110,13 @@ func main() {
 	
 	for {
 		MSeq = append(MSeq, reg.FeedBackFunc())
-		if _, ok := reg.uniqRegs[reg.GetStringDigit()]; ok {
+		var val = reg.GetStringDigit()
+		if _, ok := reg.uniqRegs[val]; ok {
 			break
 		} else {
-			reg.uniqRegs[reg.GetStringDigit()] = struct{}{}
+			reg.uniqRegs[val] = struct{}{}
 		}
+		fmt.Println(val)
 	}
 
 	if N == -1 {
