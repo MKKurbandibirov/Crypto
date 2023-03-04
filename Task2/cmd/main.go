@@ -1,15 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"crypto_task_2_sub_task_1/tests"
 )
+
+var out = bufio.NewWriter(os.Stdout)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -43,7 +49,7 @@ func (r *Register) GetStringDigit() string {
 func (r *Register) ParsePoly(poly string) {
 	polynome := strings.Split(poly, "+")
 	polynome = polynome[:len(polynome)-1]
-	
+
 	for i := 0; i < len(polynome); i++ {
 		val, _ := strconv.Atoi(polynome[i][1:])
 		r.polynome = append(r.polynome, val)
@@ -66,9 +72,9 @@ func (r *Register) GenRegister() {
 }
 
 func (r *Register) FeedBackFunc() byte {
-	var newDigit = r.Digits[r.L - r.polynome[0]]
+	var newDigit = r.Digits[r.L-r.polynome[0]]
 	for i := 1; i < len(r.polynome); i++ {
-		newDigit ^= r.Digits[r.L - r.polynome[i]]
+		newDigit ^= r.Digits[r.L-r.polynome[i]]
 	}
 
 	rightLast := r.Digits[len(r.Digits)-1]
@@ -78,6 +84,8 @@ func (r *Register) FeedBackFunc() byte {
 }
 
 func main() {
+	defer out.Flush()
+
 	var L int
 	flag.IntVar(&L, "L", 4, "Register size")
 
@@ -105,9 +113,8 @@ func main() {
 	}
 	reg.ParsePoly(feedBackFunc)
 
-	
 	MSeq := make([]byte, 0, int(math.Pow(float64(2), float64(reg.L))))
-	
+
 	for {
 		var val = reg.GetStringDigit()
 		if _, ok := reg.uniqRegs[val]; ok {
@@ -118,9 +125,19 @@ func main() {
 		}
 	}
 
-	if N == -1 {
-		fmt.Println(MSeq)
-	} else {
-		fmt.Println(MSeq[:N])
-	}
+	// if N == -1 {
+	// 	for i := 0; i < len(MSeq); i++ {
+	// 		fmt.Fprint(out, MSeq[i], " ")
+	// 	}
+	// } else {
+	// 	for i := 0; i < N; i++ {
+	// 		fmt.Fprint(out, MSeq[i], " ")
+	// 	}
+	// }
+	// fmt.Fprintln(out)
+
+	serial := tests.NewSerialTest(MSeq, 3)
+
+	serial.CountSeries()
+	serial.CountNs()
 }
