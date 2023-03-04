@@ -17,7 +17,7 @@ func init() {
 
 type Register struct {
 	uniqRegs map[string]struct{}
-	Digits   []int
+	Digits   []byte
 	polynome []int
 	L        int
 }
@@ -25,7 +25,7 @@ type Register struct {
 func NewRegister(L int) *Register {
 	return &Register{
 		uniqRegs: make(map[string]struct{}, int(math.Pow(float64(2), float64(L)))),
-		Digits:   make([]int, L),
+		Digits:   make([]byte, L),
 		L:        L,
 		polynome: make([]int, 0),
 	}
@@ -52,7 +52,7 @@ func (r *Register) ParsePoly(poly string) {
 
 func (r *Register) GenRegister() {
 	for i := 0; i < r.L; i++ {
-		r.Digits[i] = rand.Intn(2)
+		r.Digits[i] = byte(rand.Intn(2))
 	}
 
 	var data string
@@ -65,14 +65,14 @@ func (r *Register) GenRegister() {
 	}
 }
 
-func (r *Register) FeedBackFunc() int {
+func (r *Register) FeedBackFunc() byte {
 	var newDigit = r.Digits[r.L - r.polynome[0]]
 	for i := 1; i < len(r.polynome); i++ {
 		newDigit ^= r.Digits[r.L - r.polynome[i]]
 	}
 
 	rightLast := r.Digits[len(r.Digits)-1]
-	r.Digits = append([]int{newDigit}, r.Digits[:len(r.Digits)-1]...)
+	r.Digits = append([]byte{newDigit}, r.Digits[:len(r.Digits)-1]...)
 
 	return rightLast
 }
@@ -106,17 +106,16 @@ func main() {
 	reg.ParsePoly(feedBackFunc)
 
 	
-	MSeq := make([]int, 0, int(math.Pow(float64(2), float64(reg.L))))
+	MSeq := make([]byte, 0, int(math.Pow(float64(2), float64(reg.L))))
 	
 	for {
-		MSeq = append(MSeq, reg.FeedBackFunc())
 		var val = reg.GetStringDigit()
 		if _, ok := reg.uniqRegs[val]; ok {
 			break
 		} else {
+			MSeq = append(MSeq, reg.FeedBackFunc())
 			reg.uniqRegs[val] = struct{}{}
 		}
-		fmt.Println(val)
 	}
 
 	if N == -1 {

@@ -22,7 +22,7 @@ func WriteToFile(filename, data string) error {
 	return nil
 }
 
-func ReadFromFile(filename string) ([]int, error) {
+func ReadFromFile(filename string) ([]byte, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -36,9 +36,9 @@ func ReadFromFile(filename string) ([]int, error) {
 		return nil, err
 	}
 
-	result := make([]int, 0)
+	result := make([]byte, 0)
 	for i := 0; i < len(key); i++ {
-		result = append(result, int(key[i]-'0'))
+		result = append(result, byte(key[i]-'0'))
 	}
 
 	return result, nil
