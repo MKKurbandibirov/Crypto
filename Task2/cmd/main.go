@@ -136,8 +136,7 @@ func main() {
 	// }
 	// fmt.Fprintln(out)
 
-	serial := tests.NewSerialTest(MSeq, 3)
+	serial := tests.NewSerialTest(MSeq, 4)
 
-	serial.CountSeries()
-	serial.CountNs()
+	serial.Test(0)
 }
