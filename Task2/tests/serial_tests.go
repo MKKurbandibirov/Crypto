@@ -1,9 +1,13 @@
 package tests
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
 )
+
+var out = bufio.NewWriter(os.Stdout)
 
 type SerialTest struct {
 	MSeries map[string]int
@@ -12,6 +16,7 @@ type SerialTest struct {
 	MSeq    []byte
 	K       int
 	N       int
+	N_T		float64
 
 	CriticalHi map[int]map[float64]float64
 }
@@ -42,7 +47,6 @@ func getStringSeries(series []byte) string {
 }
 
 func (s *SerialTest) CountSeries() {
-	// --------------------- //
 	for len(s.MSeq) % s.K != 0 {
 		s.MSeq = s.MSeq[:len(s.MSeq)-1]
 	}
@@ -54,48 +58,47 @@ func (s *SerialTest) CountSeries() {
 	for key, val := range s.MSeries {
 		s.MFreq[key] = float64(val) / (float64(len(s.MSeq)) / float64(s.K))
 	}
-
-	// fmt.Println(s.MSeries)
-	fmt.Println("---- Эмпирические частоты ----")
-	for key, N_I := range s.MFreq {
-		fmt.Printf("%s: %f\n", key, N_I)
-	}
 }
 
 func (s *SerialTest) CountNs() {
-	NTeor := (float64(s.N) / math.Pow(2, float64(s.K)))// / (float64(len(s.MSeq)) / float64(s.K))
-
-	fmt.Println("-----  Эталонная частота -----")
-	fmt.Println("N_T =", NTeor)
+	s.N_T = (float64(s.N) / math.Pow(2, float64(s.K)))
 
 	for _, val := range s.MSeries {
-		s.Hi += math.Pow(float64(val) - NTeor, 2) / NTeor
+		s.Hi += math.Pow(float64(val) - s.N_T, 2) / s.N_T
 	}
-
-	fmt.Println("------- Критерий Хи -------")
-	fmt.Println("Hi^2 =", s.Hi)
 }
 
-func (s *SerialTest) Test(alpha float64) {
+func (s *SerialTest) Test(out *bufio.Writer, alpha float64) {
 	s.CountSeries()
 	s.CountNs()
 
-	fmt.Println("-------------------------------")
+	fmt.Fprintln(out, "---- Эмпирические частоты ----")
+	for key, N_I := range s.MFreq {
+		fmt.Fprintf(out, "%s: %f\n", key, N_I)
+	}
+
+	fmt.Fprintln(out, "-----  Эталонная частота -----")
+	fmt.Fprintln(out, "N_T =", s.N_T)
+
+	fmt.Fprintln(out, "------- Критерий Хи -------")
+	fmt.Fprintln(out, "Hi^2 =", s.Hi)
+
+	fmt.Fprintln(out, "-------------------------------")
 	if alpha == 0 {
 		HiMin, HiMax := s.CriticalHi[s.K][0.1], s.CriticalHi[s.K][0.9]
 		if HiMax <= s.Hi && HiMin >= s.Hi {
-			fmt.Println("----> Serial test passed! <----")
+			fmt.Fprintln(out, "----> Serial test passed! <----")
 		} else {
-			fmt.Println("----> Serial test failed! <----")
+			fmt.Fprintln(out, "----> Serial test failed! <----")
 		}
 	} else {
 		HiMin := s.CriticalHi[s.K][alpha]
 		if HiMin >= s.Hi {
-			fmt.Println("----> Serial test passed! <----")
+			fmt.Fprintln(out, "----> Serial test passed! <----")
 		} else {
-			fmt.Println("----> Serial test failed! <----")
+			fmt.Fprintln(out, "----> Serial test failed! <----")
 		}
 	}
-	fmt.Println("-------------------------------")
+	fmt.Fprintln(out, "-------------------------------")
 }
 

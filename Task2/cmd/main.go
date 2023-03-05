@@ -89,8 +89,8 @@ func main() {
 	var L int
 	flag.IntVar(&L, "L", 4, "Register size")
 
-	var feedBackFunc string
-	flag.StringVar(&feedBackFunc, "poly", "x4+x1+1", "Polynom for feedback function")
+	var poly string
+	flag.StringVar(&poly, "poly", "x4+x1+1", "Polynom for feedback function")
 
 	var N int
 	flag.IntVar(&N, "N", -1, "Result size")
@@ -111,7 +111,7 @@ func main() {
 	} else {
 		reg.GenRegister()
 	}
-	reg.ParsePoly(feedBackFunc)
+	reg.ParsePoly(poly)
 
 	MSeq := make([]byte, 0, int(math.Pow(float64(2), float64(reg.L))))
 
@@ -136,7 +136,13 @@ func main() {
 	// }
 	// fmt.Fprintln(out)
 
-	serial := tests.NewSerialTest(MSeq, 4)
+	// serialSeq := make([]byte, len(MSeq))
+	// copy(serialSeq, MSeq)
+	// serial := tests.NewSerialTest(serialSeq, 2) // cmd	
+	// serial.Test(out, 0) // cmd
 
-	serial.Test(0)
+	pokerSeq := make([]byte, len(MSeq))
+	copy(pokerSeq, MSeq)
+	poker := tests.NewPokerTest()
+	poker.MakeSeries(pokerSeq)
 }
