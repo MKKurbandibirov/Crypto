@@ -99,9 +99,10 @@ func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex) {
 	fmt.Fprintln(out, "-------------------------------")
 
 	for i := 1; i <= 7; i++ {
-		fmt.Fprintf(out, "N_%d = %f    ---    P_%d = %f\n", i, p.Freq[i], i, P[i-1])
+		fmt.Fprintf(out, "N_%d = %f - P_%d = %f\n", i, p.Freq[i], i, P[i-1])
 	}
 
+	fmt.Fprintln(out)
 	// TODO
 
 	mutex.Unlock()

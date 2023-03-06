@@ -79,15 +79,15 @@ func (s *SerialTest) Test(out *bufio.Writer, alpha float64, mutex *sync.Mutex) {
 	fmt.Fprintln(out, "-------- Serial Test ----------")
 	fmt.Fprintln(out, "-------------------------------")
 
-	fmt.Fprintln(out, "---- Эмпирические частоты ----")
-	for key, N_I := range s.MFreq {
-		fmt.Fprintf(out, "%s: %f\n", key, N_I)
+	fmt.Fprintln(out, "----- Эмпирические частоты ----")
+	for key, N_I := range s.MSeries {
+		fmt.Fprintf(out, "%s: %d\n", key, N_I)
 	}
 
-	fmt.Fprintln(out, "-----  Эталонная частота -----")
+	fmt.Fprintln(out, "------ Эталонная частота ------")
 	fmt.Fprintln(out, "N_T =", s.N_T)
 
-	fmt.Fprintln(out, "------- Критерий 𝒳^2 -------")
+	fmt.Fprintln(out, "--------- Критерий 𝒳^2 --------")
 	fmt.Fprintln(out, "𝒳^2 =", s.Hi)
 
 	fmt.Fprintln(out, "-------------------------------")
@@ -107,6 +107,7 @@ func (s *SerialTest) Test(out *bufio.Writer, alpha float64, mutex *sync.Mutex) {
 		}
 	}
 	fmt.Fprintln(out, "-------------------------------")
+	fmt.Fprintln(out)
 
 	mutex.Unlock()
 }
