@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"crypto_task_2_sub_task_1/tests"
@@ -98,6 +99,12 @@ func main() {
 	var keyFile string
 	flag.StringVar(&keyFile, "file", "", "File to store key")
 
+	var serialK int
+	flag.IntVar(&serialK, "serialK", 2, "Serial Test K")
+
+	var serialAlpha float64
+	flag.Float64Var(&serialAlpha, "serialAlpha", 0, "Serial Test alpha")
+
 	flag.Parse()
 
 	reg := NewRegister(L)
@@ -136,13 +143,28 @@ func main() {
 	// }
 	// fmt.Fprintln(out)
 
-	// serialSeq := make([]byte, len(MSeq))
-	// copy(serialSeq, MSeq)
-	// serial := tests.NewSerialTest(serialSeq, 2) // cmd	
-	// serial.Test(out, 0) // cmd
+	var mutex sync.Mutex
+	var wg sync.WaitGroup
 
-	pokerSeq := make([]byte, len(MSeq))
-	copy(pokerSeq, MSeq)
-	poker := tests.NewPokerTest()
-	poker.MakeSeries(pokerSeq)
+	wg.Add(1)
+	go func () {
+		defer wg.Done()
+
+		serialSeq := make([]byte, len(MSeq))
+		copy(serialSeq, MSeq)
+		serial := tests.NewSerialTest(serialSeq, serialK)
+		serial.Test(out, serialAlpha, &mutex)
+	}()
+	
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		pokerSeq := make([]byte, len(MSeq))
+		copy(pokerSeq, MSeq)
+		poker := tests.NewPokerTest()
+		poker.Test(out, pokerSeq, &mutex)
+	}()
+
+	wg.Wait()
 }

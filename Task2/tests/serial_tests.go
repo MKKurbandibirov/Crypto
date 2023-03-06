@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sync"
 )
 
 var out = bufio.NewWriter(os.Stdout)
@@ -16,7 +17,7 @@ type SerialTest struct {
 	MSeq    []byte
 	K       int
 	N       int
-	N_T		float64
+	N_T     float64
 
 	CriticalHi map[int]map[float64]float64
 }
@@ -47,7 +48,7 @@ func getStringSeries(series []byte) string {
 }
 
 func (s *SerialTest) CountSeries() {
-	for len(s.MSeq) % s.K != 0 {
+	for len(s.MSeq)%s.K != 0 {
 		s.MSeq = s.MSeq[:len(s.MSeq)-1]
 	}
 
@@ -64,13 +65,19 @@ func (s *SerialTest) CountNs() {
 	s.N_T = (float64(s.N) / math.Pow(2, float64(s.K)))
 
 	for _, val := range s.MSeries {
-		s.Hi += math.Pow(float64(val) - s.N_T, 2) / s.N_T
+		s.Hi += math.Pow(float64(val)-s.N_T, 2) / s.N_T
 	}
 }
 
-func (s *SerialTest) Test(out *bufio.Writer, alpha float64) {
+func (s *SerialTest) Test(out *bufio.Writer, alpha float64, mutex *sync.Mutex) {
 	s.CountSeries()
 	s.CountNs()
+
+	mutex.Lock()
+
+	fmt.Fprintln(out, "-------------------------------")
+	fmt.Fprintln(out, "-------- Serial Test ----------")
+	fmt.Fprintln(out, "-------------------------------")
 
 	fmt.Fprintln(out, "---- Эмпирические частоты ----")
 	for key, N_I := range s.MFreq {
@@ -80,8 +87,8 @@ func (s *SerialTest) Test(out *bufio.Writer, alpha float64) {
 	fmt.Fprintln(out, "-----  Эталонная частота -----")
 	fmt.Fprintln(out, "N_T =", s.N_T)
 
-	fmt.Fprintln(out, "------- Критерий Хи -------")
-	fmt.Fprintln(out, "Hi^2 =", s.Hi)
+	fmt.Fprintln(out, "------- Критерий 𝒳^2 -------")
+	fmt.Fprintln(out, "𝒳^2 =", s.Hi)
 
 	fmt.Fprintln(out, "-------------------------------")
 	if alpha == 0 {
@@ -100,5 +107,6 @@ func (s *SerialTest) Test(out *bufio.Writer, alpha float64) {
 		}
 	}
 	fmt.Fprintln(out, "-------------------------------")
-}
 
+	mutex.Unlock()
+}
