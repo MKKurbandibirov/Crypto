@@ -170,4 +170,9 @@ func main() {
 	}()
 
 	wg.Wait()
+
+	corrSeq := make([]byte, len(MSeq))
+	copy(corrSeq, MSeq)
+	corr := tests.NewCorrTest()
+	corr.Test(corrSeq)
 }
