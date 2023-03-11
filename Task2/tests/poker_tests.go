@@ -9,16 +9,24 @@ import (
 )
 
 type PokerTest struct {
-	U []byte
-	q int
-	Freq map[int]float64
+	U     []byte
+	q     int
+	Count map[int]int
+	M     int
+	Hi    float64
+
+	CriticalHi map[float64]float64
 }
 
 func NewPokerTest() *PokerTest {
 	return &PokerTest{
-		U: make([]byte, 0, 1000),
-		q: 10,
-		Freq: make(map[int]float64, 20),
+		U:     make([]byte, 0, 1000),
+		q:     10,
+		Count: make(map[int]int, 20),
+
+		CriticalHi: map[float64]float64{
+			0.95: 0.352, 0.9: 0.584, 0.8: 1.005, 0.2: 4.6, 0.1: 6.251, 0.05: 7.815,
+		},
 	}
 }
 
@@ -26,6 +34,7 @@ func (p *PokerTest) MakeSeries(Mseq []byte) {
 	for len(Mseq)%32 != 0 {
 		Mseq = Mseq[:len(Mseq)-1]
 	}
+	p.M = len(Mseq)
 
 	for i := 0; i < len(Mseq); i += 32 {
 		tmp := Mseq[i : i+32]
@@ -41,7 +50,7 @@ func (p *PokerTest) MakeSeries(Mseq []byte) {
 
 	cvintets := make([][10]int, len(p.U)/5)
 
-	for len(p.U) % 5 != 0 {
+	for len(p.U)%5 != 0 {
 		p.U = p.U[:len(p.U)-1]
 	}
 
@@ -55,55 +64,81 @@ func (p *PokerTest) MakeSeries(Mseq []byte) {
 		})
 
 		if cvintets[i][0] == 1 {
-			p.Freq[1]++
+			p.Count[1]++
 		} else if cvintets[i][0] == 2 {
 			if cvintets[i][1] == 1 {
-				p.Freq[2]++
+				p.Count[2]++
 			} else if cvintets[i][1] == 2 {
-				p.Freq[3]++
+				p.Count[3]++
 			}
 		} else if cvintets[i][0] == 3 {
 			if cvintets[i][1] == 1 {
-				p.Freq[4]++
+				p.Count[4]++
 			} else if cvintets[i][1] == 2 {
-				p.Freq[5]++
+				p.Count[5]++
 			}
 		} else if cvintets[i][0] == 4 {
-			p.Freq[6]++
+			p.Count[6]++
 		} else {
-			p.Freq[7]++
+			p.Count[7]++
 		}
-	}
-
-	for key, val := range p.Freq {
-		p.Freq[key] = val / float64(len(cvintets))
 	}
 }
 
-func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex) {
+func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex, alpha float64) {
 	p.MakeSeries(Mseq)
-	P := make([]float64, 7)
+	P := make([]int, 7)
 
-	P[0] = float64((p.q-1)*(p.q-2)*(p.q-3)*(p.q-4)) / math.Pow(float64(p.q), 4)
-	P[1] = 10 * float64((p.q-1)*(p.q-2)*(p.q-3)) / math.Pow(float64(p.q), 4)
-	P[2] = 15 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4)
-	P[3] = 10 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4)
-	P[4] = 10 * float64(p.q-1) / math.Pow(float64(p.q), 4)
-	P[5] = 5 * float64(p.q-1) / math.Pow(float64(p.q), 4)
-	P[6] = 1 / math.Pow(float64(p.q), 4)
+	P[0] = int(float64((p.q-1)*(p.q-2)*(p.q-3)*(p.q-4)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[1] = int(10 * float64((p.q-1)*(p.q-2)*(p.q-3)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[2] = int(15 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[3] = int(10 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[4] = int(10 * float64(p.q-1) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[5] = int(5 * float64(p.q-1) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[6] = int(1 / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	
+	for i := 0; i < 7; i++ {
+		if P[i] != 0 {
+			p.Hi += math.Pow(float64(p.Count[i+1] - P[i]), 2) / float64(P[i])
+		} else {
+
+		}
+	}
 
 	mutex.Lock()
 
-	fmt.Fprintln(out, "-------------------------------")
-	fmt.Fprintln(out, "--------- Poker Test ----------")
-	fmt.Fprintln(out, "-------------------------------")
+	fmt.Fprintln(out, "------------------------------------")
+	fmt.Fprintln(out, "------------ Poker Test ------------")
+	fmt.Fprintln(out, "------------------------------------")
 
+	fmt.Fprintln(out, "- Эмпирические и эталонные частоты -")
 	for i := 1; i <= 7; i++ {
-		fmt.Fprintf(out, "N_%d = %f - P_%d = %f\n", i, p.Freq[i], i, P[i-1])
+		fmt.Fprintf(out, "N_%d = %-4d  -\tP_%d = %-4d\n", i, p.Count[i], i, P[i-1])
 	}
 
-	fmt.Fprintln(out)
 	// TODO
+	fmt.Fprintln(out, "----------- Критерий 𝒳^2 -----------")
+	fmt.Fprintf(out, "𝒳^2 = %f\n", p.Hi)
+
+	fmt.Fprintln(out, "------------------------------------")
+	if alpha == 0 {
+		HiMin, HiMax := p.CriticalHi[0.1], p.CriticalHi[0.9]
+		if HiMax <= p.Hi && HiMin >= p.Hi {
+			fmt.Fprintln(out, "-------> Poker test passed! <-------")
+		} else {
+			fmt.Fprintln(out, "-------> Poker test failed! <-------")
+		}
+	} else {
+		HiMin := p.CriticalHi[alpha]
+		if HiMin >= p.Hi {
+			fmt.Fprintln(out, "----> Poker test passed! <-------")
+		} else {
+			fmt.Fprintln(out, "-------> Poker test failed! <-------")
+		}
+	}
+	fmt.Fprintln(out, "------------------------------------")
+
+	fmt.Fprintln(out)
 
 	mutex.Unlock()
 }

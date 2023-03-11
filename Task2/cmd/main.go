@@ -105,6 +105,9 @@ func main() {
 	var serialAlpha float64
 	flag.Float64Var(&serialAlpha, "serialAlpha", 0, "Serial Test alpha")
 
+	var pokerAlpha float64
+	flag.Float64Var(&pokerAlpha, "pokerAlpha", 0, "Poker Test alpha")
+
 	flag.Parse()
 
 	reg := NewRegister(L)
@@ -147,7 +150,7 @@ func main() {
 	var wg sync.WaitGroup
 
 	wg.Add(1)
-	go func () {
+	go func() {
 		defer wg.Done()
 
 		serialSeq := make([]byte, len(MSeq))
@@ -155,7 +158,7 @@ func main() {
 		serial := tests.NewSerialTest(serialSeq, serialK)
 		serial.Test(out, serialAlpha, &mutex)
 	}()
-	
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -163,7 +166,7 @@ func main() {
 		pokerSeq := make([]byte, len(MSeq))
 		copy(pokerSeq, MSeq)
 		poker := tests.NewPokerTest()
-		poker.Test(out, pokerSeq, &mutex)
+		poker.Test(out, pokerSeq, &mutex, pokerAlpha)
 	}()
 
 	wg.Wait()
