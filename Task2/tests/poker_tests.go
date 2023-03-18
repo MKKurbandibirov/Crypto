@@ -116,7 +116,6 @@ func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex, alph
 		fmt.Fprintf(out, "N_%d = %-4d  -\tP_%d = %-4d\n", i, p.Count[i], i, P[i-1])
 	}
 
-	// TODO
 	fmt.Fprintln(out, "----------- Критерий 𝒳^2 -----------")
 	fmt.Fprintf(out, "𝒳^2 = %f\n", p.Hi)
 

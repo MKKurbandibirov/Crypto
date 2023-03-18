@@ -46,15 +46,13 @@ func (c *CorrTest) AutoCorrFunc(Mseq []byte) {
 		D_i *= 1 / float64(len(Mseq)-k-1)
 
 		for i := 0; i < len(Mseq)-k; i++ {
-			c.R[k] += math.Abs((float64(Mseq[i]) - float64(m_i)) * (float64(Mseq[i+k]) - float64(m_i_k)))
+			c.R[k] += (float64(Mseq[i]) - float64(m_i)) * (float64(Mseq[i+k]) - float64(m_i_k))
 		}
 		c.R[k] /= float64(len(Mseq)-k)
 		c.R[k] /= math.Sqrt(D_i * D_i_k)
-
-		// fmt.Println("----------------------------->  ", c.R[k])
+		c.R[k] = math.Abs(c.R[k])
 	}
 
-	// fmt.Println(c.R)
 }
 
 func (c *CorrTest) Test(Mseq []byte, out *bufio.Writer, mutex *sync.Mutex) {
@@ -90,5 +88,5 @@ func (c *CorrTest) Test(Mseq []byte, out *bufio.Writer, mutex *sync.Mutex) {
 	}
 	fmt.Fprintln(out, "--------------------------------")
 
-	mutex.Unlock()
+	mutex.Unlock()	 
 }

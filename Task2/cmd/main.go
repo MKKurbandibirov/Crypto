@@ -125,6 +125,83 @@ func main() {
 		}
 		
 		RunTests(source, app)
+	} else if app.task == 5 {
+		bytes, err := cypher.ReadBinFile("encrypted.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		source := make([]byte, 0, len(bytes)*8)
+		for i := 0; i < len(bytes); i++ {
+			bin := make([]byte, 0, 8)
+			for bytes[i] > 0 {
+				bit := bytes[i] % 2
+				bytes[i] /= 2
+				bin = append(bin, byte(bit))
+			}
+
+			for len(bin) < 8 {
+				bin = append(bin, 0)
+			}
+
+			for i := 7; i >= 0; i-- {
+				source = append(source, bin[i])
+			}
+		}
+		
+		RunTests(source, app)
+	} else if app.task == 6 {
+		bytes, err := cypher.ReadBinFile("binfile")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		source := make([]byte, 0, len(bytes)*8)
+		for i := 0; i < len(bytes); i++ {
+			bin := make([]byte, 0, 8)
+			for bytes[i] > 0 {
+				bit := bytes[i] % 2
+				bytes[i] /= 2
+				bin = append(bin, byte(bit))
+			}
+
+			for len(bin) < 8 {
+				bin = append(bin, 0)
+			}
+
+			for i := 7; i >= 0; i-- {
+				source = append(source, bin[i])
+			}
+		}
+
+		L := 8
+		key := make([]byte, L, len(source))
+		MSeq = MSeq[:L]
+		copy(key, MSeq)
+		
+		for i := 0; i < len(source); i += L {
+			MSeq = append(MSeq, key...)
+		}
+		
+		key = key[:len(source)]
+		
+		encrypted := make([]byte, len(key))
+		for i := 0; i < len(key); i++ {
+			encrypted[i] = key[i] ^ source[i]
+		}
+
+		corr := tests.NewCorrTest()
+		for i := 1; i <= 2*L; i++ {
+			corr.K = append(corr.K, i)
+		}
+
+		corr.AutoCorrFunc(encrypted)
+
+		fmt.Fprintln(out, "-- Автокорреляционная функция --")
+
+		for i := 1; i < 2*L; i++ {
+			fmt.Fprintf(out, "R[%d] = %.6f\n", i, corr.R[i])
+		}
 	}
 
 }
