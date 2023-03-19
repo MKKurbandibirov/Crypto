@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -51,11 +52,15 @@ func NewGenerator(L int64) *Generator {
 func main() {
 	defer out.Flush()
 
-	gen := NewGenerator(10)
+	var L int64
+	flag.Int64Var(&L, "L", 128, "RSA key bit size")
+	flag.Parse()
 
-	fmt.Fprintln(out, gen.p)
-	fmt.Fprintln(out, gen.q)
-	fmt.Fprintln(out, gen.n)
-	fmt.Fprintln(out, gen.fi)
-	fmt.Fprintln(out, gen.d)
+	gen := NewGenerator(L)
+
+	publicKey := fmt.Sprintf("E: %s\nN: %s", gen.e, gen.n)
+	privateKey := fmt.Sprintf("D: %s\nN: %s", gen.d, gen.n)
+
+	WriteToFile(publicKey, "public.txt")
+	WriteToFile(privateKey, "private.txt")
 }

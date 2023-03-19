@@ -87,22 +87,20 @@ func (p *PokerTest) MakeSeries(Mseq []byte) {
 
 func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex, alpha float64) {
 	p.MakeSeries(Mseq)
-	P := make([]int, 7)
+	P := make([]float64, 7)
 
-	P[0] = int(float64((p.q-1)*(p.q-2)*(p.q-3)*(p.q-4)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[1] = int(10 * float64((p.q-1)*(p.q-2)*(p.q-3)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[2] = int(15 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[3] = int(10 * float64((p.q-1)*(p.q-2)) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[4] = int(10 * float64(p.q-1) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[5] = int(5 * float64(p.q-1) / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
-	P[6] = int(1 / math.Pow(float64(p.q), 4) * float64(p.M) / 160)
+	P[1] = (0.504 * float64(len(Mseq) / 160))
+	P[0] = (0.3024 * float64(len(Mseq) / 160))
+	P[2] = (0.108 * float64(len(Mseq) / 160))
+	P[3] = (0.072 * float64(len(Mseq) / 160))
+	P[4] = (0.009 * float64(len(Mseq) / 160))
+	P[5] = (0.0045 * float64(len(Mseq) / 160))
+	P[6] = (0.0001 * float64(len(Mseq) / 160))
+
+	fmt.Fprintln(out, P, len(p.U)/5)
 	
 	for i := 0; i < 7; i++ {
-		if P[i] != 0 {
-			p.Hi += math.Pow(float64(p.Count[i+1] - P[i]), 2) / float64(P[i])
-		} else {
-
-		}
+		p.Hi += math.Pow(float64(p.Count[i+1]) - P[i], 2) / float64(P[i])
 	}
 
 	mutex.Lock()
@@ -113,7 +111,7 @@ func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex, alph
 
 	fmt.Fprintln(out, "- Эмпирические и эталонные частоты -")
 	for i := 1; i <= 7; i++ {
-		fmt.Fprintf(out, "N_%d = %-4d  -\tP_%d = %-4d\n", i, p.Count[i], i, P[i-1])
+		fmt.Fprintf(out, "N_%d = %-4d  -\tP_%d = %-4.3f\n", i, p.Count[i], i, P[i-1])
 	}
 
 	fmt.Fprintln(out, "----------- Критерий 𝒳^2 -----------")
