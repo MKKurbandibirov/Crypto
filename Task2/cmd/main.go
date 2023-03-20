@@ -8,8 +8,8 @@ import (
 	"os"
 	"sync"
 
-	"crypto_task_2_sub_task_1/cypher"
-	"crypto_task_2_sub_task_1/tests"
+	"crypto_task_2/cypher"
+	"crypto_task_2/tests"
 )
 
 var out = bufio.NewWriter(os.Stdout)
