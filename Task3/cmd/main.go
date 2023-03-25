@@ -8,6 +8,9 @@ import (
 	"math/rand"
 	"os"
 	"time"
+
+	"crypto_task_3/cypher"
+	"crypto_task_3/utils"
 )
 
 var (
@@ -30,6 +33,7 @@ func NewGenerator(L int64) *Generator {
 	for !newP.ProbablyPrime(100) {
 		newP.Add(newP, big.NewInt(1))
 	}
+	// newP = newP.Add(newP, big.NewInt(1))
 
 	newQ := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
 	for !newQ.ProbablyPrime(100) {
@@ -54,13 +58,23 @@ func main() {
 
 	var L int64
 	flag.Int64Var(&L, "L", 128, "RSA key bit size")
+
+	var task int
+	flag.IntVar(&task, "task", 1, "Task number")
+
 	flag.Parse()
 
-	gen := NewGenerator(L)
+	if task == 1 {
+		gen := NewGenerator(L)
 
-	publicKey := fmt.Sprintf("E: %s\nN: %s", gen.e, gen.n)
-	privateKey := fmt.Sprintf("D: %s\nN: %s", gen.d, gen.n)
+		publicKey := fmt.Sprintf("E: %s\nN: %s", gen.e, gen.n)
+		privateKey := fmt.Sprintf("D: %s\nN: %s", gen.d, gen.n)
 
-	WriteToFile(publicKey, "public.txt")
-	WriteToFile(privateKey, "private.txt")
+		utils.WriteToFile(publicKey, "public.txt")
+		utils.WriteToFile(privateKey, "private.txt")
+	} else if task == 2 {
+		cypher.Run()
+	} else if task == 3 {
+		
+	}
 }
