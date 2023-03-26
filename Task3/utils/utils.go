@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"os"
 	"strings"
 )
@@ -67,8 +68,6 @@ func GetBin(text string) []string {
 		source = append(source, strings.ReplaceAll(strings.Trim(fmt.Sprint(tmp2[i]), "[]"), " ", ""))
 	}
 
-
-
 	return source
 }
 
@@ -87,4 +86,15 @@ func WriteToFile(encryptedText, filename string) error {
 	}
 
 	return nil
+}
+
+func EvclideGCD(a, b *big.Int) *big.Int {
+	for a.Cmp(big.NewInt(0)) != 0 && b.Cmp(big.NewInt(0)) != 0 {
+		if a.Cmp(b) == 1 {
+			a.Mod(a, b)
+		} else {
+			b.Mod(b, a)
+		}
+	}
+	return (new(big.Int).Add(a, b))
 }

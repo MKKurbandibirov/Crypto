@@ -28,27 +28,34 @@ type Generator struct {
 
 func NewGenerator(L int64) *Generator {
 	length := big.NewInt(0).Exp(big.NewInt(2), big.NewInt(L), nil)
+	gen := &Generator{}
 
-	newP := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
-	for !newP.ProbablyPrime(100) {
-		newP.Add(newP, big.NewInt(1))
+	for {
+		newP := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
+		for !newP.ProbablyPrime(100) {
+			newP.Add(newP, big.NewInt(1))
+		}
+		// newP = newP.Add(newP, big.NewInt(1))
+
+		fmt.Println(newP)
+
+		newQ := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
+		for !newQ.ProbablyPrime(100) {
+			newQ.Add(newQ, big.NewInt(1))
+		}
+
+		gen.p = newP
+		gen.q = newQ
+		gen.n = big.NewInt(0).Mul(newP, newQ)
+		gen.fi = big.NewInt(0).Mul(newP.Sub(newP, big.NewInt(1)), newQ.Sub(newQ, big.NewInt(1)))
+		gen.e = big.NewInt(65537)
+		gen.d = big.NewInt(0).ModInverse(gen.e, gen.fi)
+
+		var e, d *big.Int = big.NewInt(0).Set(gen.e), big.NewInt(0).Set(gen.d)
+		if big.NewInt(0).GCD(nil, nil, e, d).Cmp(big.NewInt(1)) == 0 {
+			break
+		}
 	}
-	// newP = newP.Add(newP, big.NewInt(1))
-
-	newQ := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
-	for !newQ.ProbablyPrime(100) {
-		newQ.Add(newQ, big.NewInt(1))
-	}
-
-	gen := &Generator{
-		p:  newP,
-		q:  newQ,
-		n:  big.NewInt(0).Mul(newP, newQ),
-		fi: big.NewInt(0).Mul(newP.Sub(newP, big.NewInt(1)), newQ.Sub(newQ, big.NewInt(1))),
-		e:  big.NewInt(65537),
-	}
-
-	gen.d = big.NewInt(0).ModInverse(gen.e, gen.fi)
 
 	return gen
 }
@@ -74,7 +81,10 @@ func main() {
 		utils.WriteToFile(privateKey, "private.txt")
 	} else if task == 2 {
 		cypher.Run()
-	} else if task == 3 {
-		
+	} else if task == 4 {
+		_, _, n := utils.ReadKeys()
+		N, _ := big.NewInt(0).SetString(n, 10)
+
+		fmt.Println(cypher.PollardAttack(N))
 	}
 }

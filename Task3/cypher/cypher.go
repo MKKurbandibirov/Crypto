@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"math/rand"
+	"time"
 
 	"crypto_task_3/utils"
 )
@@ -50,4 +52,31 @@ func Run() {
 	}
 
 	utils.WriteToFile(decrypted, "decrypted.txt")
+}
+
+func PollardAttack(n *big.Int) *big.Int {
+	random := big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), n)
+	k := big.NewInt(1)
+	gcd := big.NewInt(0)
+
+	for f := big.NewInt(1); f.Cmp(n) == -1; f = f.Add(f, big.NewInt(1)) {
+		x := make([]*big.Int, 0, 100)
+		x = append(x, random)
+		z := 0
+
+		i := big.NewInt(0).Add(big.NewInt(0).Exp(big.NewInt(2), k, nil), big.NewInt(1))
+		for i.Cmp(big.NewInt(0).Add(big.NewInt(0).Exp(big.NewInt(2), k.Add(k, big.NewInt(1)), nil), big.NewInt(1))) == -1 {
+			tmp := big.NewInt(0).Mod(big.NewInt(0).Add(big.NewInt(0).Exp(x[z], big.NewInt(2), nil), big.NewInt(1)), n)
+			x = append(x, tmp)
+			gcd = big.NewInt(0).GCD(nil, nil, n, big.NewInt(0).Abs(big.NewInt(0).Sub(x[0], x[z])))
+			if gcd.Cmp(big.NewInt(1)) == 1 {
+				return gcd
+			}
+			z++
+		}
+		random = x[z-1]
+		k = k.Add(k, big.NewInt(1))
+	}
+
+	return nil
 }
