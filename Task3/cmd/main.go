@@ -37,7 +37,7 @@ func NewGenerator(L int64) *Generator {
 		}
 		// newP = newP.Add(newP, big.NewInt(1))
 
-		fmt.Println(newP)
+		// fmt.Println(newP)
 
 		newQ := big.NewInt(0).Add(length, big.NewInt(0).Rand(rand.New(rand.NewSource(time.Now().UnixNano())), length))
 		for !newQ.ProbablyPrime(100) {
@@ -80,7 +80,7 @@ func main() {
 		utils.WriteToFile(publicKey, "public.txt")
 		utils.WriteToFile(privateKey, "private.txt")
 	} else if task == 2 {
-		cypher.Run()
+		cypher.Run(int(L) / 4)
 	} else if task == 4 {
 		_, _, n := utils.ReadKeys()
 		N, _ := big.NewInt(0).SetString(n, 10)

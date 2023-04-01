@@ -10,7 +10,7 @@ import (
 	"crypto_task_3/utils"
 )
 
-func Run() {
+func Run(cut int) {
 	text, err := utils.ReadFromFile("text.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -21,12 +21,11 @@ func Run() {
 	D, _ := big.NewInt(0).SetString(d, 10)
 	N, _ := big.NewInt(0).SetString(n, 10)
 
-	source := utils.GetBin(text)
+	source := utils.GetBin(text, cut)
 	fmt.Println("-------------- Source Text --------------")
 	M := make([]*big.Int, len(source))
 	for i := 0; i < len(source); i++ {
 		M[i], _ = big.NewInt(0).SetString(string(source[i]), 2)
-		fmt.Println(M[i])
 	}
 
 	C := make([]*big.Int, len(M))

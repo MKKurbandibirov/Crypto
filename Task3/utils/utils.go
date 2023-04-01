@@ -38,7 +38,7 @@ func ReadKeys() (E, D, N string) {
 	return E, D, N
 }
 
-func GetBin(text string) []string {
+func GetBin(text string, cut int) []string {
 	tmp := make([]byte, 0, len(text)*8)
 	for i := 0; i < len(text); i++ {
 		var val = text[i]
@@ -57,9 +57,9 @@ func GetBin(text string) []string {
 		}
 	}
 
-	cut := len(tmp) / 4
-	tmp2 := make([][]byte, 0, 4)
-	for i := 0; i < len(tmp); i += cut {
+	size := len(tmp) / cut
+	tmp2 := make([][]byte, 0, size+1)
+	for i := 0; i < len(tmp)-cut; i += cut {
 		tmp2 = append(tmp2, tmp[i:i+cut])
 	}
 
