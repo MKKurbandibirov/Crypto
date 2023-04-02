@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"sync"
 
@@ -71,7 +70,7 @@ func main() {
 	}
 	reg.ParsePoly(app.poly)
 
-	MSeq := make([]byte, 0, int(math.Pow(float64(2), float64(reg.L))))
+	MSeq := make([]byte, 0, 1000000)
 
 	for {
 		var val = reg.GetStringDigit()
@@ -123,7 +122,7 @@ func main() {
 				source = append(source, bin[i])
 			}
 		}
-		
+
 		RunTests(source, app)
 	} else if app.task == 5 {
 		bytes, err := cypher.ReadBinFile("encrypted.txt")
@@ -148,7 +147,7 @@ func main() {
 				source = append(source, bin[i])
 			}
 		}
-		
+
 		RunTests(source, app)
 	} else if app.task == 6 {
 		bytes, err := cypher.ReadBinFile("binfile")
@@ -178,13 +177,13 @@ func main() {
 		key := make([]byte, L, len(source))
 		MSeq = MSeq[:L]
 		copy(key, MSeq)
-		
+
 		for i := 0; i < len(source); i += L {
 			MSeq = append(MSeq, key...)
 		}
-		
+
 		key = key[:len(source)]
-		
+
 		encrypted := make([]byte, len(key))
 		for i := 0; i < len(key); i++ {
 			encrypted[i] = key[i] ^ source[i]
@@ -199,7 +198,7 @@ func main() {
 
 		fmt.Fprintln(out, "-- Автокорреляционная функция --")
 
-		for i := 1; i < 2*L; i++ {
+		for i := 1; i <= 2*L; i++ {
 			fmt.Fprintf(out, "R[%d] = %.6f\n", i, corr.R[i])
 		}
 	}

@@ -97,7 +97,7 @@ func (p *PokerTest) Test(out *bufio.Writer, Mseq []byte, mutex *sync.Mutex, alph
 	P[5] = (0.0045 * float64(len(Mseq) / 160))
 	P[6] = (0.0001 * float64(len(Mseq) / 160))
 
-	fmt.Fprintln(out, P, len(p.U)/5)
+	// fmt.Fprintln(out, P, len(p.U)/5)
 	
 	for i := 0; i < 7; i++ {
 		p.Hi += math.Pow(float64(p.Count[i+1]) - P[i], 2) / float64(P[i])

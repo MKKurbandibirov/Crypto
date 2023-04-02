@@ -43,7 +43,7 @@ func (c *CorrTest) AutoCorrFunc(Mseq []byte) {
 		for j := k; j < len(Mseq); j++ {
 			D_i_k += math.Pow(float64(Mseq[j])-m_i_k, 2)
 		}
-		D_i *= 1 / float64(len(Mseq)-k-1)
+		D_i_k *= 1 / float64(len(Mseq)-k-1)
 
 		for i := 0; i < len(Mseq)-k; i++ {
 			c.R[k] += (float64(Mseq[i]) - float64(m_i)) * (float64(Mseq[i+k]) - float64(m_i_k))

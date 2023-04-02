@@ -3,6 +3,7 @@ package cypher
 import (
 	"fmt"
 	"log"
+	"math"
 	"math/big"
 
 	"crypto_task_3/utils"
@@ -20,10 +21,11 @@ func Run(cut int) {
 	N, _ := big.NewInt(0).SetString(n, 10)
 
 	source := utils.GetBin(text, cut)
-	fmt.Println("-------------- Source Text --------------")
 	M := make([]*big.Int, len(source))
+	// var numText string
 	for i := 0; i < len(source); i++ {
 		M[i], _ = big.NewInt(0).SetString(string(source[i]), 2)
+		// fmt.Println(M[i])
 	}
 
 	C := make([]*big.Int, len(M))
@@ -49,4 +51,23 @@ func Run(cut int) {
 	}
 
 	utils.WriteToFile(decrypted, "decrypted.txt")
+
+	// var bin = make([]byte, 0, len(R)*8)
+	// for i := 0; i < len(R); i++ {
+	// 	bin = append(bin, utils.GetBits(string(R[i].Bytes()))...)
+	// }
+
+	// res := make([]byte, 0, len(bin)/8)
+	// for i := 0; i < len(bin); i += 8 {
+	// 	tmp := bin[i : i+8]
+	// 	var n byte
+	// 	for j := 0; j < len(tmp); j++ {
+	// 		n += byte(math.Pow(2, float64(j)) * float64(tmp[j]))
+	// 	}
+
+	// 	res = append(res, n)
+	// }
+	// // res = res[:len(source)]
+
+	// fmt.Println(string(res))
 }
