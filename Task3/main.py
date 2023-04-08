@@ -18,12 +18,16 @@ def task2(bits:int = 128) -> None:
     f.close()
 
     cypher.encryption(text)
+    print('--- Encrypted text ---')
+    print(cypher.get_encrypted())
+    print('--- Decrypted text ---')
     print(cypher.decryption())
 
     write_txt(cypher)
+
 
 def task3() -> None:
     attack()
 
 if __name__ == '__main__':
-    task2()
+    print(task3())

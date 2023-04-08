@@ -1,7 +1,7 @@
-decrypted.txt
-encrypted.txt
-crypto
+__pycache__/
 private.txt
 public.txt
 text.txt
-N.txt
+encrypted.txt
+decrypted.txt
+en_text.txt

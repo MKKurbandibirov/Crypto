@@ -7,7 +7,7 @@ class RSAKeys:
         self.bits = bits
 
         while True:
-            self.p = generator(bits)+1
+            self.p = generator(bits)
             self.q = generator(bits)
             self.n = self.p * self.q
             self.fi = (self.p-1) * (self.q-1)

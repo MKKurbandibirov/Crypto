@@ -5,9 +5,11 @@ class RSA_Cypher:
         self.keys = keys
 
     def encryption(self, text: str) -> list:
+        while len(text) % 8:
+            text += ' '
         bytes_text = bytes(text, 'utf-8')
 
-        binary = []
+        self.binary1 = []
         for byte in bytes_text:
             j = 0
             rev = []
@@ -16,21 +18,19 @@ class RSA_Cypher:
                 byte //= 2
                 j += 1
 
-            while j < 12:
-                binary.append(0)
+            while j < 8:
+                self.binary1.append(0)
                 j += 1
             
             rev.reverse()
-            binary.extend(rev)
-        
-        print(binary)
+            self.binary1.extend(rev)
 
         cut = self.keys.bits // 4
 
         i = 0
         cutted = []
-        while i < len(binary):
-            cutted.append(binary[i:i+cut])
+        while i < len(self.binary1):
+            cutted.append(self.binary1[i:i+cut])
             i += cut
 
         self.source = []
@@ -51,8 +51,8 @@ class RSA_Cypher:
         self.decrypted = []
         for val in self.encrypted:
             self.decrypted.append(pow(val, self.keys.d, self.keys.n))
-        
-        binary = []
+
+        self.binary2 = []
         for byte in self.decrypted:
             j = 0
             rev = []
@@ -61,30 +61,62 @@ class RSA_Cypher:
                 byte //= 2
                 j += 1
 
-            while j < 12:
+            while j < self.keys.bits // 4:
+                self.binary2.append(0)
+                j += 1
+            
+            rev.reverse()
+            self.binary2.extend(rev)
+
+        byte = 0
+        cutted = []
+        while byte < len(self.binary2):
+            cutted.append(self.binary2[byte:byte+8])
+            byte += 8
+
+        text = []
+        for val in cutted:
+            byte = 0
+            sum = 0
+            while byte < len(val):
+                sum += pow(2, len(val)-byte-1)*val[byte]
+                byte += 1
+            
+            text.append(sum)
+
+        return ''.join(map(chr, text))
+
+    def get_encrypted(self) -> str:
+        binary = []
+        for byte in self.encrypted:
+            j = 0
+            rev = []
+            while byte > 0:
+                rev.append(byte%2)
+                byte //= 2
+                j += 1
+
+            while j < self.keys.bits // 4:
                 binary.append(0)
                 j += 1
             
             rev.reverse()
             binary.extend(rev)
         
-        print(binary)
-
-        i = 0
+        byte = 0
         cutted = []
-        while i < len(binary):
-            cutted.append(binary[i:i+12])
-            i += 12
-        
+        while byte < len(binary):
+            cutted.append(binary[byte:byte+8])
+            byte += 8
 
         text = []
         for val in cutted:
-            i = 0
+            byte = 0
             sum = 0
-            while i < len(val):
-                sum += pow(2, len(val)-i-1)*val[i]
-                i += 1
+            while byte < len(val):
+                sum += pow(2, len(val)-byte-1)*val[byte]
+                byte += 1
             
             text.append(sum)
 
-        return ''
+        return ''.join(map(chr, text))
