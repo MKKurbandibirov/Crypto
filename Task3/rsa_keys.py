@@ -11,7 +11,7 @@ class RSAKeys:
             self.q = generator(bits)
             self.n = self.p * self.q
             self.fi = (self.p-1) * (self.q-1)
-            self.e = 65537
+            self.e = 3
             self.d = y = pow(self.e, -1, self.fi)
 
             if math.gcd(self.e, self.d) == 1:

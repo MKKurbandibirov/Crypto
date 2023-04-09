@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"crypto_task_2/cypher"
@@ -21,32 +23,52 @@ func RunTests(MSeq []byte, app *App) {
 	go func() {
 		defer wg.Done()
 
-		serialSeq := make([]byte, len(MSeq))
-		copy(serialSeq, MSeq)
-		serial := tests.NewSerialTest(serialSeq, app.serialK)
+		// tmp := make([]byte, 0, 1000000)
+		file, err := os.Open("test_e65537")
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		tmp, err := io.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		tmp1 := strings.Trim(string(tmp), "[]")
+
+		arr := strings.Split(tmp1, ", ")
+
+		serialSeq := make([]byte, 0, 1000000)
+		for i := 0; i < len(arr); i++ {
+			serialSeq = append(serialSeq, byte([]byte(arr[i])[0])-'0')
+		}
+
+		// serialSeq := make([]byte, len(MSeq))
+		// copy(serialSeq, MSeq)
+		serial := tests.NewSerialTest(serialSeq, 4)
 		serial.Test(out, app.serialAlpha, &mutex)
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
 
-		pokerSeq := make([]byte, len(MSeq))
-		copy(pokerSeq, MSeq)
-		poker := tests.NewPokerTest()
-		poker.Test(out, pokerSeq, &mutex, app.pokerAlpha)
-	}()
+	// 	pokerSeq := make([]byte, len(MSeq))
+	// 	copy(pokerSeq, MSeq)
+	// 	poker := tests.NewPokerTest()
+	// 	poker.Test(out, pokerSeq, &mutex, app.pokerAlpha)
+	// }()
 
-	wg.Add(1)
+	// wg.Add(1)
 
-	go func() {
-		defer wg.Done()
+	// go func() {
+	// 	defer wg.Done()
 
-		corrSeq := make([]byte, len(MSeq))
-		copy(corrSeq, MSeq)
-		corr := tests.NewCorrTest()
-		corr.Test(corrSeq, out, &mutex)
-	}()
+	// 	corrSeq := make([]byte, len(MSeq))
+	// 	copy(corrSeq, MSeq)
+	// 	corr := tests.NewCorrTest()
+	// 	corr.Test(corrSeq, out, &mutex)
+	// }()
 
 	wg.Wait()
 }

@@ -27,6 +27,8 @@ class RSA_Cypher:
 
         cut = self.keys.bits // 4
 
+        # print("Length: ", len(self.binary1))
+
         i = 0
         cutted = []
         while i < len(self.binary1):
@@ -87,7 +89,7 @@ class RSA_Cypher:
         return ''.join(map(chr, text))
 
     def get_encrypted(self) -> str:
-        binary = []
+        self.binary = []
         for byte in self.encrypted:
             j = 0
             rev = []
@@ -97,16 +99,18 @@ class RSA_Cypher:
                 j += 1
 
             while j < self.keys.bits // 4:
-                binary.append(0)
+                self.binary.append(0)
                 j += 1
             
             rev.reverse()
-            binary.extend(rev)
+            self.binary.extend(rev)
+        
+        print(self.binary)
         
         byte = 0
         cutted = []
-        while byte < len(binary):
-            cutted.append(binary[byte:byte+8])
+        while byte < len(self.binary):
+            cutted.append(self.binary[byte:byte+8])
             byte += 8
 
         text = []
