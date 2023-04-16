@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 	"sync"
 
 	"crypto_task_2/cypher"
@@ -23,8 +22,7 @@ func RunTests(MSeq []byte, app *App) {
 	go func() {
 		defer wg.Done()
 
-		// tmp := make([]byte, 0, 1000000)
-		file, err := os.Open("test_e65537")
+		file, err := os.Open("out.txt")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,41 +32,61 @@ func RunTests(MSeq []byte, app *App) {
 			log.Fatal(err)
 		}
 
-		tmp1 := strings.Trim(string(tmp), "[]")
-
-		arr := strings.Split(tmp1, ", ")
-
 		serialSeq := make([]byte, 0, 1000000)
-		for i := 0; i < len(arr); i++ {
-			serialSeq = append(serialSeq, byte([]byte(arr[i])[0])-'0')
+		for i := 0; i < len(tmp); i++ {
+			serialSeq = append(serialSeq, byte(tmp[i])-'0')
 		}
 
-		// serialSeq := make([]byte, len(MSeq))
-		// copy(serialSeq, MSeq)
-		serial := tests.NewSerialTest(serialSeq, 4)
+		serial := tests.NewSerialTest(serialSeq, 2)
 		serial.Test(out, app.serialAlpha, &mutex)
 	}()
 
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-	// 	pokerSeq := make([]byte, len(MSeq))
-	// 	copy(pokerSeq, MSeq)
-	// 	poker := tests.NewPokerTest()
-	// 	poker.Test(out, pokerSeq, &mutex, app.pokerAlpha)
-	// }()
+		file, err := os.Open("out.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		tmp, err := io.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// wg.Add(1)
+		pokerSeq := make([]byte, 0, 1000000)
+		for i := 0; i < len(tmp); i++ {
+			pokerSeq = append(pokerSeq, byte(tmp[i])-'0')
+		}
+	
+		poker := tests.NewPokerTest()
+		poker.Test(out, pokerSeq, &mutex, app.pokerAlpha)
+	}()
 
-	// go func() {
-	// 	defer wg.Done()
+	wg.Add(1)
 
-	// 	corrSeq := make([]byte, len(MSeq))
-	// 	copy(corrSeq, MSeq)
-	// 	corr := tests.NewCorrTest()
-	// 	corr.Test(corrSeq, out, &mutex)
-	// }()
+	go func() {
+		defer wg.Done()
+
+		file, err := os.Open("out.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		tmp, err := io.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		corrSeq := make([]byte, 0, 1000000)
+		for i := 0; i < len(tmp); i++ {
+			corrSeq = append(corrSeq, byte(tmp[i])-'0')
+		}
+	
+		corr := tests.NewCorrTest()
+		corr.Test(corrSeq, out, &mutex)
+	}()
 
 	wg.Wait()
 }
